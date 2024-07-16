@@ -42,4 +42,5 @@ def evaluate_prediction():
     plt.xlabel('Y', fontsize = 10)
     plt.ylabel('Y_Pred', fontsize = 10)
     plt.scatter(Y, Y_Pred)
+    plt.show()
     print('Evaluation Finished')
