@@ -9,7 +9,7 @@ from columns import COLUMNS
 import pickle
 
 def load_model_input():
-    print('Model Input Process Started')
+    print('Preparing Model Input Process Started')
     # 위에서 저장한 Scaler들을 불러와 학습 데이터들을 표준화/일반화
     with open(os.path.join('models', 'scaler_std.pkl'), 'rb') as f:
         scaler_std = pickle.load(f)
@@ -57,4 +57,4 @@ def load_model_input():
             file_path = os.path.join('data', 'training', 'training_stock', 'X_label', f'X_label_{code}_{name}.npy')
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             np.save(file_path, X_label_std_norm)
-    print('Model Input Process finished')
+    print('Preparing Model Input Process finished')

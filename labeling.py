@@ -119,3 +119,66 @@ def macd_labeling():
             
     scipy.stats.describe(y)
     print('MACD Labeling Finished')
+
+def volatility_labeling():
+    #변동성 label
+    print('Volatility Labeling Started')
+    label_type = 'Pretrained by Label 4 + Label 6 : Daily Returns - Standard Deviation of Returns'
+
+    sigmoid = lambda x: 1 / (1 + np.exp(-x))
+
+    y = []
+    for path, dirs, files in os.walk(os.path.join('data', 'training', 'training_stock', 'X_label')):
+        pbar = tqdm(files)
+        for filename in pbar:
+            code = filename.split('.')[0].split('_')[-2]
+            name = filename.split('.')[0].split('_')[-1]
+            pbar.set_description(code)
+            file_path = os.path.join(path, filename)
+            X_label = np.load(file_path)
+
+            #_y = sigmoid((X_label[:, 0] * 0.5 + X_label[:, 1] * 0.3 + X_label[:, 2] * 0.2) * 3)     ##각각 수익성, 안전성, 유동성
+            #y.extend(_y)
+
+
+            #new label start
+            #ema. 볼린저 밴드
+
+            peak_diffratio = X_label[:,0]
+            interpeak_mdd = X_label[:,1]
+            interpeak_trans_price_exp = X_label[:,2]
+            ema_5 = X_label[:,3]
+            ema_20 = X_label[:,4]
+            ema_100=X_label[:,5]
+            ema_200=X_label[:,6]
+            wma_20=X_label[:,7]
+            wma_200=X_label[:,9]
+            macd = X_label[:,11]
+            signal = X_label[:,12]
+            bb_middle=X_label[:13]
+            bb_upper = X_label[:,14]
+            bb_lower = X_label[:,15]
+            bb_bandwidth=X_label[:,16]
+            daily_return=X_label[:,17]
+            std_return=X_label[:,18]
+
+            alpha=0.5
+            labels=[]
+            label = sigmoid(0)
+            for i in range(len(ema_5)):
+                if daily_return[i]>=alpha*std_return[i]:
+                    label=sigmoid(daily_return[i]- alpha*std_return[i])#매수
+                elif daily_return[i]<-alpha*std_return[i]:
+                    label=sigmoid(daily_return[i] + alpha*std_return[i]) #매도
+                labels.append(label)
+            y=labels
+
+
+            file_path = os.path.join('data', 'training', 'training_stock', 'y', f'y_{code}_{name}.npy')
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            np.save(file_path, y)
+            #new label end
+
+    #print(len(labels))
+    scipy.stats.describe(y)
+    print('Volatility Labeling Finished')
